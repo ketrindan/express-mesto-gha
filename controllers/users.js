@@ -7,15 +7,16 @@ module.exports.getUsers = (req, res) => {
 }
 
 module.exports.getUserById = (req, res) => {
-  User.findById(req.params.id)
+  User.findById(req.params.userId)
   .then((user) => {
-    if (!user) {
-      res.status(404).send({ message: 'Запрашиваемый пользователь не найден' });
-      return;
-    }
-    res.send({ data: user })
+    res.status(200).send({ data: user })
   })
-  .catch(err => res.status(500).send({ message: 'Произошла ошибка' }));
+  .catch((err, user) => {
+    if (!user) {
+      return res.status(404).send({ message: 'Запрашиваемый пользователь не найден' });
+    }
+    res.status(500).send({ message: 'Произошла ошибка' })
+  });
 }
 
 module.exports.createUser = (req, res) => {
@@ -23,39 +24,42 @@ module.exports.createUser = (req, res) => {
 
   User.create({ name, about, avatar })
   .then((user) => {
-    if (!user) {
-      res.status(400).send({ message: 'Переданы некорректные данные' });
-      return;
-    }
-    res.send({ data: user })
+    res.status(200).send({ data: user })
   })
-  .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+  .catch((err, user) => {
+    if (!user) {
+      return res.status(400).send({ message: 'Переданы некорректные данные' });
+    }
+    res.status(500).send({ message: 'Произошла ошибка' })
+  });
 }
 
 module.exports.updateUserProfile = (req, res) => {
   const { name, about } = req.body;
 
-  User.findByIdAndUpdate(req.params.id, { name, about })
+  User.findByIdAndUpdate(req.params.userId, { name, about })
   .then((user) => {
-    if (!user) {
-      res.status(400).send({ message: 'Переданы некорректные данные' });
-      return;
-    }
-    res.send({ data: user })
+    res.status(200).send({ data: user })
   })
-  .catch(err => res.status(500).send({ message: 'Произошла ошибка' }));
+  .catch((err, user) => {
+    if (!user) {
+      return res.status(400).send({ message: 'Переданы некорректные данные' });
+    }
+    res.status(500).send({ message: 'Произошла ошибка' })
+  });
 }
 
 module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
 
-  User.findByIdAndUpdate(req.params.id, { avatar })
+  User.findByIdAndUpdate(req.params.userId, { avatar })
   .then((user) => {
-    if (!user) {
-      res.status(400).send({ message: 'Переданы некорректные данные' });
-      return;
-    }
-    res.send({ data: user })
+    res.status(200).send({ data: user })
   })
-  .catch(err => res.status(500).send({ message: 'Произошла ошибка' }));
+  .catch((err, user) => {
+    if (!user) {
+      return res.status(400).send({ message: 'Переданы некорректные данные' });
+    }
+    res.status(500).send({ message: 'Произошла ошибка' })
+  });
 }

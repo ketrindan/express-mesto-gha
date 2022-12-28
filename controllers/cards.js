@@ -3,7 +3,7 @@ const Card = require('../models/card')
 module.exports.getCards = (req, res) => {
   Card.find({})
   .then(cards => res.send({ data: cards }))
-  .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+  .catch(err => res.status(500).send({ message: 'Произошла ошибка' }));
 }
 
 module.exports.createCard = (req, res) => {
@@ -13,55 +13,59 @@ module.exports.createCard = (req, res) => {
 
   Card.create({ name, link })
   .then((card) => {
-    if (!card) {
-      res.status(400).send({ message: 'Переданы некорректные данные' });
-      return;
-    }
-    res.send({ data: card })
+    res.status(200).send({ data: card })
   })
-  .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+  .catch((err, card) => {
+    if (!card) {
+      return res.status(400).send({ message: 'Переданы некорректные данные' });
+    }
+    res.status(500).send({ message: 'Произошла ошибка' })
+  });
 }
 
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.id)
+  Card.findByIdAndRemove(req.params.cardId)
   .then((card) => {
-    if (!card) {
-      res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
-      return;
-    }
-    res.send({ data: card })
+    res.status(200).send({ data: card })
   })
-  .catch(err => res.status(500).send({ message: 'Произошла ошибка' }));
+  .catch((err, card) => {
+    if (!card) {
+      return res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
+    }
+    res.status(500).send({ message: 'Произошла ошибка' })
+  });
 }
 
 module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
-    { $addToSet: { likes: req.user._id } },
+    { $addToSet: { likes: req.user.cardId } },
     { new: true },
   )
   .then((card) => {
-    if (!card) {
-      res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
-      return;
-    }
-    res.send({ data: card })
+    res.status(200).send({ data: card })
   })
-  .catch(err => res.status(500).send({ message: 'Произошла ошибка' }));
+  .catch((err, card) => {
+    if (!card) {
+      return res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
+    }
+    res.status(500).send({ message: 'Произошла ошибка' })
+  });
 }
 
 module.exports.dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
-    { $pull: { likes: req.user._id } },
+    { $pull: { likes: req.user.cardId } },
     { new: true },
   )
   .then((card) => {
-    if (!card) {
-      res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
-      return;
-    }
-    res.send({ data: card })
+    res.status(200).send({ data: card })
   })
-  .catch(err => res.status(500).send({ message: 'Произошла ошибка' }));
+  .catch((err, card) => {
+    if (!card) {
+      return res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
+    }
+    res.status(500).send({ message: 'Произошла ошибка' })
+  });
 }
