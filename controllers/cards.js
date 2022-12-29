@@ -54,6 +54,10 @@ module.exports.createCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
   .then((card) => {
+    if (!card) {
+      res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
+      return;
+    }
     res.send({ data: card })
   })
   .catch((err) => {
@@ -83,6 +87,10 @@ module.exports.likeCard = (req, res) => {
     { new: true, runValidators: true },
   )
   .then((card) => {
+    if (!card) {
+      res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
+      return;
+    }
     res.send({ data: card })
   })
   .catch((err) => {
@@ -112,6 +120,10 @@ module.exports.dislikeCard = (req, res) => {
     { new: true, runValidators: true },
   )
   .then((card) => {
+    if (!card) {
+      res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
+      return;
+    }
     res.send({ data: card })
   })
   .catch((err) => {
