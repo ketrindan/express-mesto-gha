@@ -11,43 +11,46 @@ const {
 
 module.exports.getCards = (req, res) => {
   Card.find({})
-  .then(cards => res.send({ data: cards }))
-  .catch((err) => {
-    res.status(NTERNAL_SERVER_ERROR).send({ message: NTERNAL_ERROR_MESSAGE })
-  });
-}
+    .then((cards) => res.send({ data: cards }))
+    .catch(() => {
+      res.status(NTERNAL_SERVER_ERROR).send({ message: NTERNAL_ERROR_MESSAGE });
+    });
+};
 
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
-  const owner = req.user._id;
 
-  Card.create({ name, link, owner: owner })
-  .then((card) => {
-    res.status(CREATED_RESPONSE).send({ data: card })
-  })
-  .catch((err) => {
-    if (err.name === 'ValidationError') {
-      res.status(BAD_REQUEST_ERROR).send({ message: BAD_REQUEST_MESSAGE });
-      return;
-    }
+  Card.create({ name, link, owner: req.user._id })
+    .then((card) => {
+      res.status(CREATED_RESPONSE).send({ data: card });
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(BAD_REQUEST_ERROR).send({ message: BAD_REQUEST_MESSAGE });
+        return;
+      }
 
-    res.status(NTERNAL_SERVER_ERROR).send({ message: NTERNAL_ERROR_MESSAGE })
-  });
-}
+      res.status(NTERNAL_SERVER_ERROR).send({ message: NTERNAL_ERROR_MESSAGE });
+    });
+};
 
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-  .then((card) => {
-    if (!card) {
-      res.status(NOT_FOUND_ERROR).send({ message: NOT_FOUND_MESSAGE });
-      return;
-    }
-    res.send({ data: card })
-  })
-  .catch((err) => {
-    res.status(NTERNAL_SERVER_ERROR).send({ message: NTERNAL_ERROR_MESSAGE })
-  });
-}
+    .then((card) => {
+      if (!card) {
+        res.status(NOT_FOUND_ERROR).send({ message: NOT_FOUND_MESSAGE });
+        return;
+      }
+      res.send({ data: card });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(BAD_REQUEST_ERROR).send({ message: BAD_REQUEST_MESSAGE });
+        return;
+      }
+      res.status(NTERNAL_SERVER_ERROR).send({ message: NTERNAL_ERROR_MESSAGE });
+    });
+};
 
 module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(
@@ -55,22 +58,22 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user.cardId } },
     { new: true, runValidators: true },
   )
-  .then((card) => {
-    if (!card) {
-      res.status(NOT_FOUND_ERROR).send({ message: NOT_FOUND_MESSAGE });
-      return;
-    }
-    res.send({ data: card })
-  })
-  .catch((err) => {
-    if (err.name === 'ValidationError') {
-      res.status(BAD_REQUEST_ERROR).send({ message: BAD_REQUEST_MESSAGE });
-      return;
-    }
+    .then((card) => {
+      if (!card) {
+        res.status(NOT_FOUND_ERROR).send({ message: NOT_FOUND_MESSAGE });
+        return;
+      }
+      res.send({ data: card });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(BAD_REQUEST_ERROR).send({ message: BAD_REQUEST_MESSAGE });
+        return;
+      }
 
-    res.status(NTERNAL_SERVER_ERROR).send({ message: NTERNAL_ERROR_MESSAGE })
-  });
-}
+      res.status(NTERNAL_SERVER_ERROR).send({ message: NTERNAL_ERROR_MESSAGE });
+    });
+};
 
 module.exports.dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(
@@ -78,19 +81,19 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user.cardId } },
     { new: true, runValidators: true },
   )
-  .then((card) => {
-    if (!card) {
-      res.status(NOT_FOUND_ERROR).send({ message: NOT_FOUND_MESSAGE });
-      return;
-    }
-    res.send({ data: card })
-  })
-  .catch((err) => {
-    if (err.name === 'ValidationError') {
-      res.status(BAD_REQUEST_ERROR).send({ message: BAD_REQUEST_MESSAGE });
-      return;
-    }
+    .then((card) => {
+      if (!card) {
+        res.status(NOT_FOUND_ERROR).send({ message: NOT_FOUND_MESSAGE });
+        return;
+      }
+      res.send({ data: card });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(BAD_REQUEST_ERROR).send({ message: BAD_REQUEST_MESSAGE });
+        return;
+      }
 
-    res.status(NTERNAL_SERVER_ERROR).send({ message: NTERNAL_ERROR_MESSAGE })
-  });
-}
+      res.status(NTERNAL_SERVER_ERROR).send({ message: NTERNAL_ERROR_MESSAGE });
+    });
+};
