@@ -3,21 +3,27 @@ const Card = require('../models/card')
 module.exports.getCards = (req, res) => {
   Card.find({})
   .then(cards => res.send({ data: cards }))
-  .catch(err => res.status(500).send({ message: 'Произошла ошибка' }));
+  .catch((err) => {
+    if (err.name === 'ValidationError') {
+      res.status(400).send({ message: 'Переданы некорректные данные' });
+      return;
+    }
+    res.status(500).send({ message: 'Произошла ошибка' })
+  });
 }
 
 module.exports.createCard = (req, res) => {
-  console.log(req.user._id);
-
   const { name, link } = req.body;
+  const owner = req.user._id;
 
-  Card.create({ name, link })
+  Card.create({ name, link, owner: owner })
   .then((card) => {
-    res.status(200).send({ data: card })
+    res.send({ data: card })
   })
-  .catch((err, card) => {
-    if (!card) {
-      return res.status(400).send({ message: 'Переданы некорректные данные' });
+  .catch((err) => {
+    if (err.name === 'ValidationError') {
+      res.status(400).send({ message: 'Переданы некорректные данные' });
+      return;
     }
     res.status(500).send({ message: 'Произошла ошибка' })
   });
@@ -26,13 +32,10 @@ module.exports.createCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
   .then((card) => {
-    res.status(200).send({ data: card })
+    res.send({ data: card })
   })
-  .catch((err, card) => {
-    if (!card) {
-      return res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
-    }
-    res.status(500).send({ message: 'Произошла ошибка' })
+  .catch((err) => {
+    res.status(404).send({ message: 'Запрашиваемая карточка не найдена' })
   });
 }
 
@@ -43,12 +46,19 @@ module.exports.likeCard = (req, res) => {
     { new: true },
   )
   .then((card) => {
-    res.status(200).send({ data: card })
+    res.send({ data: card })
   })
-  .catch((err, card) => {
-    if (!card) {
-      return res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
+  .catch((err) => {
+    if (err.name === 'ValidationError') {
+      res.status(400).send({ message: 'Переданы некорректные данные' });
+      return;
     }
+
+    if (err.name === 'CastError') {
+      res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
+      return;
+    }
+
     res.status(500).send({ message: 'Произошла ошибка' })
   });
 }
@@ -60,11 +70,17 @@ module.exports.dislikeCard = (req, res) => {
     { new: true },
   )
   .then((card) => {
-    res.status(200).send({ data: card })
+    res.send({ data: card })
   })
-  .catch((err, card) => {
-    if (!card) {
-      return res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
+  .catch((err) => {
+    if (err.name === 'ValidationError') {
+      res.status(400).send({ message: 'Переданы некорректные данные' });
+      return;
+    }
+
+    if (err.name === 'CastError') {
+      res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
+      return;
     }
     res.status(500).send({ message: 'Произошла ошибка' })
   });
