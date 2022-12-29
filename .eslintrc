@@ -8,11 +8,6 @@
           "_id"
         ]
       }
-    ],
-    "import/newline-after-import": [
-      "error",
-      { "count": 0
-      }
     ]
   }
 }
