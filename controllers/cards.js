@@ -20,7 +20,8 @@ module.exports.getCards = (req, res) => {
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
 
-  Card.create({ name, link, owner: req.user._id }).populate(['owner', 'likes'])
+  Card.create({ name, link, owner: req.user._id })
+    .then((card) => card.populate(['owner', 'likes']))
     .then((card) => {
       res.status(CREATED_RESPONSE).send({ data: card });
     })
