@@ -61,16 +61,15 @@ module.exports.updateUserProfile = (req, res) => {
     { new: true, runValidators: true },
   )
     .then((user) => {
+      if (!user) {
+        res.status(NOT_FOUND_ERROR).send({ message: NOT_FOUND_MESSAGE });
+        return;
+      }
       res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST_ERROR).send({ message: BAD_REQUEST_MESSAGE });
-        return;
-      }
-
-      if (err.name === 'NotFoundError') {
-        res.status(NOT_FOUND_ERROR).send({ message: NOT_FOUND_MESSAGE });
         return;
       }
 
@@ -87,16 +86,15 @@ module.exports.updateAvatar = (req, res) => {
     { new: true, runValidators: true },
   )
     .then((user) => {
+      if (!user) {
+        res.status(NOT_FOUND_ERROR).send({ message: NOT_FOUND_MESSAGE });
+        return;
+      }
       res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(BAD_REQUEST_ERROR).send({ message: BAD_REQUEST_MESSAGE });
-        return;
-      }
-
-      if (err.name === 'NotFoundError') {
-        res.status(NOT_FOUND_ERROR).send({ message: NOT_FOUND_MESSAGE });
         return;
       }
 

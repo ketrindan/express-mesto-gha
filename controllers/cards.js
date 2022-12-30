@@ -10,7 +10,7 @@ const {
 } = require('../utils/constants');
 
 module.exports.getCards = (req, res) => {
-  Card.find({})
+  Card.find({}).populate(['owner', 'likes'])
     .then((cards) => res.send({ data: cards }))
     .catch(() => {
       res.status(NTERNAL_SERVER_ERROR).send({ message: NTERNAL_ERROR_MESSAGE });
@@ -20,7 +20,7 @@ module.exports.getCards = (req, res) => {
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
 
-  Card.create({ name, link, owner: req.user._id })
+  Card.create({ name, link, owner: req.user._id }).populate(['owner', 'likes'])
     .then((card) => {
       res.status(CREATED_RESPONSE).send({ data: card });
     })
@@ -35,7 +35,7 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findByIdAndRemove(req.params.cardId).populate(['owner', 'likes'])
     .then((card) => {
       if (!card) {
         res.status(NOT_FOUND_ERROR).send({ message: NOT_FOUND_MESSAGE });
@@ -56,8 +56,8 @@ module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user.cardId } },
-    { new: true, runValidators: true },
-  )
+    { new: true },
+  ).populate(['owner', 'likes'])
     .then((card) => {
       if (!card) {
         res.status(NOT_FOUND_ERROR).send({ message: NOT_FOUND_MESSAGE });
@@ -79,8 +79,8 @@ module.exports.dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user.cardId } },
-    { new: true, runValidators: true },
-  )
+    { new: true },
+  ).populate(['owner', 'likes'])
     .then((card) => {
       if (!card) {
         res.status(NOT_FOUND_ERROR).send({ message: NOT_FOUND_MESSAGE });
