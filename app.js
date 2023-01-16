@@ -30,7 +30,7 @@ app.use(auth);
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
 
-app.use('*', (req, res, next) => {
+app.use((req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 });
 
@@ -40,7 +40,7 @@ app.use((err, req, res, next) => {
   const status = err.statusCode || 500;
   const message = err.message || 'Произошла внутренняя ошибка сервера';
 
-  res.status(status).send(message);
+  res.status(status).send({ message });
   next();
 });
 

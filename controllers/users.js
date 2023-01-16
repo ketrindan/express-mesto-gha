@@ -32,7 +32,14 @@ module.exports.createUser = (req, res, next) => {
       password: hash,
     }))
     .then((user) => {
-      res.status(201).send({ data: user });
+      res.status(201).send(
+        user.toObject({
+          transform: () => {
+            delete res.password;
+            return res;
+          },
+        }),
+      );
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -115,13 +122,12 @@ module.exports.login = (req, res, next) => {
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
-  const { id } = req.user._id;
-  User.findById(id)
+  User.findById(req.user._id)
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Пользователь не найден');
       }
-      res.status(200).send(user);
+      res.status(200).send({ data: user });
     })
     .catch(next);
 };
