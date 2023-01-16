@@ -37,10 +37,10 @@ module.exports.deleteCard = (req, res, next) => {
         throw new ForbiddenError('Удалять чужие карточки запрещено');
       }
 
-      Card.findByIdAndRemove(req.params.cardId).populate(['owner', 'likes']);
+      return Card.findByIdAndRemove(req.params.cardId).populate(['owner', 'likes']);
     })
-    .then((deleted) => {
-      res.status(200).send({ data: deleted });
+    .then((card) => {
+      res.status(200).send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
