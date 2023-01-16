@@ -1,59 +1,54 @@
 const Card = require('../models/card');
-const {
-  BAD_REQUEST_ERROR,
-  NOT_FOUND_ERROR,
-  NTERNAL_SERVER_ERROR,
-  CREATED_RESPONSE,
-  BAD_REQUEST_MESSAGE,
-  NOT_FOUND_MESSAGE,
-  NTERNAL_ERROR_MESSAGE,
-} = require('../utils/constants');
+const BadRequestError = require('../errors/BadRequestError');
+const NotFoundError = require('../errors/NotFoundError');
+const ForbiddenError = require('../errors/ForbiddenError');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({}).populate(['owner', 'likes'])
     .then((cards) => res.send({ data: cards }))
-    .catch(() => {
-      res.status(NTERNAL_SERVER_ERROR).send({ message: NTERNAL_ERROR_MESSAGE });
-    });
+    .catch(next);
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => card.populate(['owner', 'likes']))
     .then((card) => {
-      res.status(CREATED_RESPONSE).send({ data: card });
+      res.status(201).send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(BAD_REQUEST_ERROR).send({ message: BAD_REQUEST_MESSAGE });
-        return;
+        next(new BadRequestError('Переданы некорректные данные'));
       }
 
-      res.status(NTERNAL_SERVER_ERROR).send({ message: NTERNAL_ERROR_MESSAGE });
+      next(err);
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId).populate(['owner', 'likes'])
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND_ERROR).send({ message: NOT_FOUND_MESSAGE });
-        return;
+        throw new NotFoundError('Карточка не найдена');
       }
-      res.send({ data: card });
+
+      if (card.owner._id !== req.user._id) {
+        throw new ForbiddenError('Удвлять чужие карточки запрещено');
+      }
+
+      res.status(200).send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(BAD_REQUEST_ERROR).send({ message: BAD_REQUEST_MESSAGE });
-        return;
+        next(new BadRequestError('Переданы некорректные данные'));
       }
-      res.status(NTERNAL_SERVER_ERROR).send({ message: NTERNAL_ERROR_MESSAGE });
+
+      next(err);
     });
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user.cardId } },
@@ -61,22 +56,20 @@ module.exports.likeCard = (req, res) => {
   ).populate(['owner', 'likes'])
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND_ERROR).send({ message: NOT_FOUND_MESSAGE });
-        return;
+        throw new NotFoundError('Карточка не найдена');
       }
       res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(BAD_REQUEST_ERROR).send({ message: BAD_REQUEST_MESSAGE });
-        return;
+        next(new BadRequestError('Переданы некорректные данные'));
       }
 
-      res.status(NTERNAL_SERVER_ERROR).send({ message: NTERNAL_ERROR_MESSAGE });
+      next(err);
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user.cardId } },
@@ -84,17 +77,15 @@ module.exports.dislikeCard = (req, res) => {
   ).populate(['owner', 'likes'])
     .then((card) => {
       if (!card) {
-        res.status(NOT_FOUND_ERROR).send({ message: NOT_FOUND_MESSAGE });
-        return;
+        throw new NotFoundError('Карточка не найдена');
       }
       res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(BAD_REQUEST_ERROR).send({ message: BAD_REQUEST_MESSAGE });
-        return;
+        next(new BadRequestError('Переданы некорректные данные'));
       }
 
-      res.status(NTERNAL_SERVER_ERROR).send({ message: NTERNAL_ERROR_MESSAGE });
+      next(err);
     });
 };
