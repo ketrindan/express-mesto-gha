@@ -18,8 +18,8 @@ const signUpValidation = celebrate({
 });
 
 const getUserIdValidation = celebrate({
-  body: Joi.object().keys({
-    userId: Joi.string().required().length(24).alphanum(),
+  params: Joi.object().keys({
+    userId: Joi.string().length(24).alphanum(),
   }),
 });
 
@@ -39,13 +39,13 @@ const updateAvatarValidation = celebrate({
 const createCardValidation = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().pattern(/^https?:\/\/(www)?[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=]+#?$/),
+    link: Joi.string().required().pattern(/^https?:\/\/(www)?[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=]+#?$/),
   }),
 });
 
 const getCardIdValidation = celebrate({
-  body: Joi.object().keys({
-    cardId: Joi.string().required().length(24).alphanum(),
+  params: Joi.object().keys({
+    cardId: Joi.string().length(24).alphanum(),
   }),
 });
 

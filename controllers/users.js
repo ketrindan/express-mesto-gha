@@ -19,7 +19,13 @@ module.exports.getUserById = (req, res, next) => {
       }
       res.status(200).send({ data: user });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Переданы некорректные данные'));
+      }
+
+      next(err);
+    });
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -33,12 +39,13 @@ module.exports.createUser = (req, res, next) => {
     }))
     .then((user) => {
       res.status(201).send(
-        user.toObject({
-          transform: () => {
-            delete res.password;
-            return res;
-          },
-        }),
+        {
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          _id: user._id,
+          email: user.email,
+        },
       );
     })
     .catch((err) => {
