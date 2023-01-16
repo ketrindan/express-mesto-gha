@@ -39,8 +39,8 @@ module.exports.deleteCard = (req, res, next) => {
 
       return card;
     })
-    .then(() => {
-      Card.findByIdAndRemove(req.params.cardId).populate(['owner', 'likes']);
+    .then((card) => {
+      Card.findByIdAndRemove(card._id).populate(['owner', 'likes']);
     })
     .then((deleted) => {
       res.status(200).send({ data: deleted });
