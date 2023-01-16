@@ -27,15 +27,13 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  const currentUserId = req.user._id;
-
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Карточка не найдена');
       }
 
-      if (card.owner.id !== currentUserId) {
+      if (card.owner.id.valueOf() !== req.user._id) {
         throw new ForbiddenError('Удалять чужие карточки запрещено');
       }
 
