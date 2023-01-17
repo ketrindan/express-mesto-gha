@@ -11,15 +11,20 @@ const {
   signUpValidation,
 } = require('./middlewares/validation');
 const NotFoundError = require('./errors/NotFoundError');
+const errorHandler = require('./middlewares/errorHandler');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3000, MONGODB_PATH = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
+
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = 'some-secret-key';
+}
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
+mongoose.connect(MONGODB_PATH, {
   useNewUrlParser: true,
 });
 
@@ -37,13 +42,7 @@ app.use((req, res, next) => {
 
 app.use(errors());
 
-app.use((err, req, res, next) => {
-  const status = err.statusCode || 500;
-  const message = err.message || 'Произошла внутренняя ошибка сервера';
-
-  res.status(status).send({ message });
-  next();
-});
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
